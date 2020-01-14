@@ -45,14 +45,18 @@ module.exports = {
     const { id } = req.params;
     const { name, avatar_url, bio, latitude, longitude, techs } = req.body;
 
+    const dev = await Dev.findOne({ _id: id });
+
+    if(!dev) {
+      return res.status(404).json({ message: 'Usuário não encontrado.'});
+    }
+
     const techsArray = parseStringAsArray(techs);
 
     const location = {
       type: 'Point',
       coordinates: [longitude, latitude],
-    };
-
-    const dev = await Dev.findOne({ _id: id });
+    };    
 
     dev.name = name;
     dev.avatar_url = avatar_url;
@@ -61,14 +65,20 @@ module.exports = {
     dev.location = location;
 
     await dev.save();
-    
+
     return res.json(dev);
   },
   
   async destroy (req, res) {
     const { id } = req.params;
 
-    await Dev.deleteOne({ _id: id });
+    const dev = await Dev.findOne({ _id: id });
+
+    if(!dev) {
+      return res.status(404).json({ message: 'Usuário não encontrado.'});
+    }
+
+    await Dev.deleteOne({ _id: id })  ;
 
     return res.json({ message: 'Usuário deletado com sucesso.'});
   }
